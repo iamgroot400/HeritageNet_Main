@@ -1,0 +1,22 @@
+# virtual environment (huge — PyTorch etc.)
+.venv/
+venv/
+
+# data: raw + split copies (regenerable from datasets)
+datasets/
+data/
+
+# model weights
+checkpoints/
+*.pt
+*.pth
+
+# generated outputs
+outputs/
+logs/
+
+# python cruft
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/

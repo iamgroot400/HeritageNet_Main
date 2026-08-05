@@ -1,0 +1,25 @@
+experiment_name: baseline_mobilenetv3
+
+data:
+  root: data
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+
+model:
+  name: mobilenet_v3_large
+  pretrained: true
+  dropout: 0.2
+
+optim:
+  name: adamw
+  lr: 0.001
+  weight_decay: 0.0001
+
+train:
+  epochs: 50
+  amp: true
+  seed: 42
+  early_stopping_patience: 10
+  label_smoothing: 0.1

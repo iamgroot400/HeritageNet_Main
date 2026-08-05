@@ -1,0 +1,27 @@
+# ── HeritageNet dependencies ─────────────────────────────────────────
+# GPU (CUDA 12.4) build of PyTorch for the RTX 3050.
+# This --extra-index-url line makes pip pull the CUDA torch build while
+# still using the normal source for everything else. Without it, torch
+# installs CPU-only and the GPU sits idle.
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+# Core deep learning
+torch>=2.1
+torchvision>=0.16
+
+# Data / numerics
+numpy
+pillow
+
+# Training UX
+tqdm
+
+# Metrics & evaluation
+scikit-learn
+
+# Visualisation & logging
+matplotlib
+tensorboard
+
+# Config
+pyyaml
