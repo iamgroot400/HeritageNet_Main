@@ -1,12 +1,7 @@
 """
-scripts/save_mistakes.py
-
 Copy every misclassified TEST image into outputs/mistakes/, renamed:
     TRUE=<real site>__PRED=<what the model guessed>__<original filename>
 so you can SEE why each confusion happens.
-
-Run from the repo root (venv active):
-    python scripts/save_mistakes.py
 """
 
 from __future__ import annotations

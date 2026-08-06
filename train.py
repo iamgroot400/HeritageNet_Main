@@ -1,15 +1,3 @@
-"""
-train.py  —  driver script for HeritageNet phase-1 training.
-
-Run from the repo root with the venv active:
-
-    python train.py                       # defaults: mobilenet_v3_small, 20 epochs
-    python train.py --epochs 30 --lr 5e-4 # override any knob
-
-This file contains almost no logic of its own. Its whole job is to pick up the
-modules we built (datamodule -> factory -> trainer) and run them in order.
-"""
-
 from __future__ import annotations
 
 import argparse

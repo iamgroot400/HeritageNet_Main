@@ -39,9 +39,9 @@ from torch.utils.data import DataLoader
 @dataclass
 class TrainConfig:
     epochs: int = 20
-    lr: float = 1e-3                 # comfy stride for a fresh head (phase 1)
-    weight_decay: float = 1e-4       # mild L2; helps on small data
-    label_smoothing: float = 0.0     # try 0.05-0.1 later to curb overconfidence
+    lr: float =  5e-5                 # comfy stride for a fresh head (phase 1)
+    weight_decay: float =  5e-4       # mild L2; helps on small data
+    label_smoothing: float = 0.1     # try 0.05-0.1 later to curb overconfidence
     monitor: str = "val_acc"         # "val_acc" (maximize) or "val_loss" (minimize)
     patience: int = 5                # epochs of no improvement before stopping
     amp: bool = True                 # mixed precision; auto-disabled off CUDA

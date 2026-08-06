@@ -1,6 +1,4 @@
 """
-heritagenet/models/factory.py
-
 One entry point for building every model: build_model(...).
 
 No other file (trainer, eval, predict) should ever import torchvision models
@@ -127,7 +125,7 @@ def build_model(
     num_classes: int = 2,
     pretrained: bool = True,
     freeze_backbone: bool = True,
-    dropout: float = 0.2,
+    dropout: float = 0.3,
 ) -> nn.Module:
     if name not in _REGISTRY:
         raise ValueError(f"Unknown model {name!r}. Available: {available_models()}")

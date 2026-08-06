@@ -7,11 +7,6 @@ ImageNet features are nudged gently, not destroyed.
 
 Starts from checkpoints/best.pt (phase 1) and saves to checkpoints/best_phase2.pt,
 leaving the phase-1 baseline intact for comparison.
-
-Run from the repo root (venv active):
-
-    python train_phase2.py
-    python train_phase2.py --lr 5e-5 --epochs 15      # even gentler
 """
 
 from __future__ import annotations
@@ -53,7 +48,7 @@ def main():
                     help="phase-1 checkpoint to start from")
     ap.add_argument("--batch-size", type=int, default=32)
     ap.add_argument("--epochs", type=int, default=20)
-    ap.add_argument("--lr", type=float, default=1e-4,
+    ap.add_argument("--lr", type=float, default= 5e-5,
                     help="LOW lr for gentle fine-tuning (phase 1 used 1e-3)")
     ap.add_argument("--num-workers", type=int, default=0)
     args = ap.parse_args()

@@ -1,8 +1,4 @@
 """
-scripts/evaluate.py
-
-Honest evaluation on the UNTOUCHED test set.
-
 The trainer only ever looked at train/val. This script loads the best saved
 checkpoint and runs it against test/ — data that influenced nothing — to get:
 
@@ -12,11 +8,6 @@ checkpoint and runs it against test/ — data that influenced nothing — to get
                             for your imbalanced data)
   * a per-class report     (precision/recall/F1 for every temple)
   * a confusion matrix PNG (which sites get mistaken for which)
-
-Run from the repo root (venv active):
-
-    python scripts/evaluate.py
-    python scripts/evaluate.py --ckpt checkpoints/best.pt --model mobilenet_v3_small
 """
 
 from __future__ import annotations

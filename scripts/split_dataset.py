@@ -1,6 +1,4 @@
 """
-scripts/split_dataset.py
-
 Take the raw dataset —
 
     datasets/
@@ -8,17 +6,11 @@ Take the raw dataset —
       <site_2>/ *.jpg
       ...
 
-and produce a stratified train/val/test split —
+and produce a stratified train/val/test split —  split into 70/15/15 
 
     data/
       train/<site_1>/...   val/<site_1>/...   test/<site_1>/...
       train/<site_2>/...   val/<site_2>/...   test/<site_2>/...
-
-Run from the repo root (venv active):
-
-    python scripts/split_dataset.py                       # 70/15/15 defaults
-    python scripts/split_dataset.py --train 0.8 --val 0.1 --test 0.1
-    python scripts/split_dataset.py --clean               # wipe old split first
 
 Key design choices
 ------------------
