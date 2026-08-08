@@ -125,7 +125,7 @@ def build_model(
     num_classes: int = 2,
     pretrained: bool = True,
     freeze_backbone: bool = True,
-    dropout: float = 0.3,
+    dropout: float = 0.2,
 ) -> nn.Module:
     if name not in _REGISTRY:
         raise ValueError(f"Unknown model {name!r}. Available: {available_models()}")

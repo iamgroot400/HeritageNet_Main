@@ -1,12 +1,11 @@
 """
-train_phase2.py  —  Phase-2 fine-tuning.
+train_phase2.py  —  Phase-2 fine-tuning.  [EXPERIMENT: dropout 0.3]
 
-Continues from your phase-1 model, but UNFREEZES the backbone so the network's
-"eyes" can adapt to your temples — at a much lower learning rate so the valuable
-ImageNet features are nudged gently, not destroyed.
+Continues from the phase-1 model, unfreezes the backbone, fine-tunes gently.
+This copy is configured for a SINGLE controlled experiment: dropout 0.3
+(vs the champion's 0.2), same LR (1e-4), everything else at baseline.
 
-Starts from checkpoints/best.pt (phase 1) and saves to checkpoints/best_phase2.pt,
-leaving the phase-1 baseline intact for comparison.
+Saves to a distinct checkpoint so it cannot touch best_phase2.pt or the champion.
 """
 
 from __future__ import annotations
@@ -48,8 +47,12 @@ def main():
                     help="phase-1 checkpoint to start from")
     ap.add_argument("--batch-size", type=int, default=32)
     ap.add_argument("--epochs", type=int, default=20)
-    ap.add_argument("--lr", type=float, default= 1e-4,
+    ap.add_argument("--lr", type=float, default=1e-4,
                     help="LOW lr for gentle fine-tuning (phase 1 used 1e-3)")
+    ap.add_argument("--dropout", type=float, default=0.3,
+                    help="head dropout for this experiment (champion used 0.2)")
+    ap.add_argument("--ckpt-name", default="best_phase2_dropout03.pt",
+                    help="distinct name so this run can't overwrite other models")
     ap.add_argument("--num-workers", type=int, default=0)
     args = ap.parse_args()
 
@@ -60,35 +63,37 @@ def main():
     print(f"classes ({dm.num_classes})")
     train_loader, val_loader = make_loaders(dm, args.batch_size, args.num_workers)
 
-    # rebuild the architecture, then load the phase-1 weights (backbone + head)
+    # rebuild architecture with the EXPERIMENT dropout, then load phase-1 weights
     model = build_model(args.model, num_classes=dm.num_classes,
-                        pretrained=False, freeze_backbone=True)
+                        pretrained=False, freeze_backbone=True,
+                        dropout=args.dropout)
     ckpt = torch.load(args.init_ckpt, map_location=device)
     model.load_state_dict(ckpt["model_state"])
     print(f"loaded phase-1 weights from {args.init_ckpt} "
           f"(val_acc {ckpt.get('val_acc')})")
+    print(f"EXPERIMENT: dropout={args.dropout}, lr={args.lr}")
 
-    # THE phase-2 step: unfreeze the whole network so features can adapt.
+    # unfreeze the whole network
     set_backbone_trainable(model, True)
     trn, tot = count_parameters(model)
     print(f"after unfreeze: trainable {trn:,}/{tot:,} "
           f"({100 * trn / tot:.1f}% now training)")
 
-    # gentle fine-tune; save to a SEPARATE checkpoint to preserve the baseline
     cfg = TrainConfig(epochs=args.epochs, lr=args.lr,
-                      ckpt_dir="checkpoints", ckpt_name="best_phase2.pt")
+                      ckpt_dir="checkpoints", ckpt_name=args.ckpt_name)
     trainer = Trainer(model, device, cfg)
     history = trainer.fit(train_loader, val_loader)
 
     Path("outputs").mkdir(parents=True, exist_ok=True)
-    with open("outputs/history_phase2.json", "w") as f:
+    hist_name = f"outputs/history_{Path(args.ckpt_name).stem}.json"
+    with open(hist_name, "w") as f:
         json.dump(history, f, indent=2)
-    print("saved history -> outputs/history_phase2.json")
+    print(f"saved history -> {hist_name}")
 
-    print(f"\nphase-2 best {cfg.monitor} = {history['best_score']:.3f} "
+    print(f"\nbest {cfg.monitor} = {history['best_score']:.3f} "
           f"at epoch {history['best_epoch']}")
-    print("phase-2 checkpoint: checkpoints/best_phase2.pt")
-    print("(phase-1 baseline checkpoints/best.pt left untouched)")
+    print(f"checkpoint: checkpoints/{args.ckpt_name}")
+    print("(champion phase2_86acc_FINAL.pt and best_phase2.pt left untouched)")
 
 
 if __name__ == "__main__":
