@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeritageNet — Identify Nepali Heritage Sites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
+<style>
+  :root{
+    --ink:#243b53; --sub:#627d98; --bg:#faf8f5; --card:#ffffff; --line:#e9e5df;
+    --teal:#1f8a80; --coral:#e8663d; --gold:#e2a63b; --good:#3a9d8f; --bad:#d64545;
+    --disp:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6}
+  .wrap{max-width:820px;margin:0 auto;padding:32px 22px 80px}
+  header{text-align:center;margin-bottom:28px}
+  header .eyebrow{font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--teal);font-weight:600;margin-bottom:10px}
+  header h1{font-family:var(--disp);font-size:clamp(30px,6vw,46px);font-weight:800;line-height:1.05}
+  header p{color:var(--sub);margin-top:12px;font-size:16px}
+
+  .drop{background:var(--card);border:2px dashed var(--line);border-radius:20px;
+    padding:44px 24px;text-align:center;transition:border-color .2s,background .2s;cursor:pointer}
+  .drop.drag{border-color:var(--teal);background:#f0f8f6}
+  .drop svg{width:46px;height:46px;color:var(--teal);margin-bottom:12px}
+  .drop b{font-size:17px}.drop span{display:block;color:var(--sub);font-size:14px;margin-top:6px}
+  .btns{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  button{font-family:var(--body);font-size:15px;font-weight:600;border:none;border-radius:12px;
+    padding:12px 22px;cursor:pointer;transition:transform .1s,opacity .2s}
+  button:active{transform:scale(.97)}
+  .b-primary{background:var(--teal);color:white}
+  .b-ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  input[type=file]{display:none}
+
+  #status{text-align:center;color:var(--sub);font-size:14px;margin:18px 0;min-height:20px}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--line);
+    border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;
+    vertical-align:middle;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .result{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    overflow:hidden;margin-top:22px;display:none}
+  .result.show{display:block;animation:fade .4s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .result img{width:100%;max-height:340px;object-fit:cover;display:block;background:#eee}
+  .rbody{padding:24px}
+  .verdict{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .verdict h2{font-family:var(--disp);font-size:28px;font-weight:800}
+  .conf{font-size:14px;font-weight:600;padding:4px 12px;border-radius:20px}
+  .conf.hi{background:#e7f4f1;color:var(--good)} .conf.lo{background:#fbeae8;color:var(--bad)}
+  .meta{color:var(--sub);font-size:14px;margin:4px 0 14px}
+  .desc{font-size:15px;line-height:1.7}
+  .unknown{padding:24px;text-align:center}
+  .unknown h2{font-family:var(--disp);color:var(--coral);font-size:24px;margin-bottom:6px}
+  .unknown p{color:var(--sub);font-size:15px}
+
+  .top3{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+  .top3 h4{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);margin-bottom:10px}
+  .prow{display:grid;grid-template-columns:1fr 60px;align-items:center;gap:12px;margin:7px 0}
+  .prow .pn{font-size:14px}
+  .ptrack{grid-column:1/2;background:#eee;height:8px;border-radius:6px;overflow:hidden;margin-top:3px}
+  .pfill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal))}
+  .prow .pp{font-family:var(--body);font-size:13px;color:var(--sub);text-align:right}
+
+  .note{font-size:12px;color:var(--sub);text-align:center;margin-top:26px;line-height:1.7}
+  .settings{text-align:center;margin-top:14px;font-size:13px;color:var(--sub)}
+  .settings input{width:60px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;
+    font-family:var(--body)}
+  footer{text-align:center;color:var(--sub);font-size:12px;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">HeritageNet · runs in your browser</div>
+    <h1>Identify a Nepali heritage site</h1>
+    <p>Upload or take a photo of a temple, stupa, or monastery — the model runs
+       entirely on your device and names the site.</p>
+  </header>
+
+  <div class="drop" id="drop">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M12 16V4M12 4l-4 4M12 4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+        stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>Drop a photo here, or tap to choose</b>
+    <span>your photo never leaves your device</span>
+    <div class="btns">
+      <button class="b-primary" onclick="document.getElementById('file').click();event.stopPropagation()">Choose photo</button>
+      <button class="b-ghost" onclick="document.getElementById('cam').click();event.stopPropagation()">Use camera</button>
+    </div>
+  </div>
+  <input type="file" id="file" accept="image/*">
+  <input type="file" id="cam" accept="image/*" capture="environment">
+
+  <div id="status"></div>
+
+  <div class="result" id="result">
+    <img id="rimg" alt="uploaded photo">
+    <div id="rcontent"></div>
+  </div>
+
+  <div class="settings">
+    "Not recognized" below confidence
+    <input type="number" id="thr" value="55" min="0" max="100" step="5">%
+  </div>
+
+  <p class="note">
+    Model: MobileNetV3-small · 26 sites · 86.6% test accuracy.<br>
+    Predictions are best-effort; the model only knows its 26 trained sites and may be
+    confidently wrong on anything else.
+  </p>
+  <footer>HeritageNet — on-device heritage recognition</footer>
+</div>
+
+<script>
+const MODEL_URL = "heritagenet.onnx";
+const LABELS_URL = "labels.json";
+const INFO_URL   = "site_info.json";
+const MEAN = [0.485,0.456,0.406], STD = [0.229,0.224,0.225];
+
+let session=null, labels=null, info=null;
+const statusEl=document.getElementById('status');
+const resultEl=document.getElementById('result');
+const rimg=document.getElementById('rimg');
+const rcontent=document.getElementById('rcontent');
+
+function setStatus(html){ statusEl.innerHTML=html; }
+
+async function init(){
+  try{
+    setStatus('<span class="spinner"></span>loading model…');
+    ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/";
+    [labels, info] = await Promise.all([
+      fetch(LABELS_URL).then(r=>r.json()),
+      fetch(INFO_URL).then(r=>r.json()).catch(()=>({})),
+    ]);
+    session = await ort.InferenceSession.create(MODEL_URL,
+      {executionProviders:["wasm"]});
+    setStatus('Ready — choose a photo to begin.');
+  }catch(e){
+    setStatus('⚠️ Could not load the model. Make sure heritagenet.onnx, labels.json, '
+      +'and site_info.json sit next to this page. ('+e.message+')');
+  }
+}
+
+// preprocess: resize shorter side→256, center-crop 224, normalize, to NCHW float32
+function preprocess(imgEl){
+  const S=256, C=224;
+  const w=imgEl.naturalWidth, h=imgEl.naturalHeight;
+  let nw,nh;
+  if(w<h){ nw=S; nh=Math.round(S*h/w);} else { nh=S; nw=Math.round(S*w/h);}
+  const cv=document.createElement('canvas'); cv.width=nw; cv.height=nh;
+  const cx=cv.getContext('2d'); cx.drawImage(imgEl,0,0,nw,nh);
+  const left=Math.floor((nw-C)/2), top=Math.floor((nh-C)/2);
+  const px=cx.getImageData(left,top,C,C).data;   // RGBA, C*C*4
+  const out=new Float32Array(3*C*C);
+  for(let i=0;i<C*C;i++){
+    for(let c=0;c<3;c++){
+      const v=px[i*4+c]/255.0;
+      out[c*C*C+i]=(v-MEAN[c])/STD[c];           // CHW
+    }
+  }
+  return new ort.Tensor('float32', out, [1,3,C,C]);
+}
+
+function softmax(a){
+  const m=Math.max(...a); const e=a.map(x=>Math.exp(x-m));
+  const s=e.reduce((p,q)=>p+q,0); return e.map(x=>x/s);
+}
+
+async function classify(imgEl){
+  if(!session){ setStatus('model not ready yet…'); return; }
+  setStatus('<span class="spinner"></span>analyzing…');
+  try{
+    const t=preprocess(imgEl);
+    const out=await session.run({input:t});
+    const logits=Array.from(out.logits.data);
+    const probs=softmax(logits);
+    const idx=probs.map((p,i)=>[p,i]).sort((a,b)=>b[0]-a[0]);
+    const thr=(parseFloat(document.getElementById('thr').value)||0)/100;
+    render(idx, probs, thr);
+    setStatus('');
+  }catch(e){ setStatus('⚠️ inference failed: '+e.message); }
+}
+
+function render(idx, probs, thr){
+  const [topP, topI]=idx[0];
+  const key=labels[topI]; const meta=(info&&info[key])||{};
+  const nameNice=(meta.name)|| (key? key.replace(/_/g,' '):('class '+topI));
+  let html;
+  if(topP<thr){
+    html=`<div class="unknown"><h2>Not recognized</h2>
+      <p>The model isn't confident this is one of its 26 known sites
+      (top guess ${nameNice}, ${(topP*100).toFixed(0)}%). Try a clearer, closer photo.</p></div>`;
+  }else{
+    const confClass=topP>=0.75?'hi':'lo';
+    html=`<div class="rbody">
+      <div class="verdict"><h2>${nameNice}</h2>
+        <span class="conf ${confClass}">${(topP*100).toFixed(0)}% confident</span></div>
+      <div class="meta">${meta.type?meta.type+' · ':''}${meta.location||''}</div>
+      <div class="desc">${meta.description||'No description available yet.'}</div>
+      <div class="top3"><h4>Other possibilities</h4>${top3rows(idx,probs)}</div>
+    </div>`;
+  }
+  rcontent.innerHTML=html; resultEl.classList.add('show');
+  resultEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function top3rows(idx){
+  let s='';
+  for(let k=0;k<3 && k<idx.length;k++){
+    const [p,i]=idx[k]; const key=labels[i];
+    const nm=(info&&info[key]&&info[key].name)||(key?key.replace(/_/g,' '):('class '+i));
+    s+=`<div class="prow"><div><div class="pn">${nm}</div>
+      <div class="ptrack"><div class="pfill" style="width:${(p*100).toFixed(0)}%"></div></div></div>
+      <div class="pp">${(p*100).toFixed(0)}%</div></div>`;
+  }
+  return s;
+}
+
+function handleFile(f){
+  if(!f) return;
+  const url=URL.createObjectURL(f);
+  rimg.onload=()=>{ classify(rimg); URL.revokeObjectURL(url); };
+  rimg.src=url; resultEl.classList.add('show');
+  rcontent.innerHTML='';
+}
+
+// wiring
+const drop=document.getElementById('drop');
+document.getElementById('file').addEventListener('change',e=>handleFile(e.target.files[0]));
+document.getElementById('cam').addEventListener('change',e=>handleFile(e.target.files[0]));
+drop.addEventListener('click',()=>document.getElementById('file').click());
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{
+  e.preventDefault();drop.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{
+  e.preventDefault();drop.classList.remove('drag');}));
+drop.addEventListener('drop',e=>{ if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+init();
+</script>
+</body>
+</html>

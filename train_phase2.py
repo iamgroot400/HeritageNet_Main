@@ -7,6 +7,8 @@ ImageNet features are nudged gently, not destroyed.
 
 Starts from checkpoints/best.pt (phase 1) and saves to checkpoints/best_phase2.pt,
 leaving the phase-1 baseline intact for comparison.
+
+This model was created by tweaking the learning rate to(5e-5) and unfreezing the backbone in the original HeritageNet paper's
 """
 
 from __future__ import annotations
