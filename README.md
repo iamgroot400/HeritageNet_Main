@@ -160,8 +160,8 @@ Dataset: **CC BY 4.0** (released separately).
 
 Built as a research/thesis project. The dataset was photographed by the team.
 
-**Mentors:** Sijan Shrestha · Hari Om Shah
+**Mentors:** Sijan Shrestha · Hari Om Sah
 
-**Team:** Ashutosh Chapagain · Rasim Mahato · Diva Awasti · Kriti Puri · Suyog Adhikari · Pratik Sharma
+**Team:** Ashutosh Chapagai· Rasim Mahato · Diva Awasthi · Kriti Puri · Suyog Adhikari · Pratik Sharma
 
 With thanks to everyone who contributed to photographing and labelling the heritage sites.
