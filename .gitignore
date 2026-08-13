@@ -1,22 +1,57 @@
-# virtual environment (huge — PyTorch etc.)
+# ============================================================
+# HeritageNet .gitignore
+# Keep the repo CODE-ONLY. Never commit data, models, or venv.
+# (These are what caused the 3.57 GB push failure before.)
+# ============================================================
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---- Virtual environments ----
 .venv/
 venv/
+env/
+ENV/
 
-# data: raw + split copies (regenerable from datasets)
-datasets/
+# ---- HEAVY: data & datasets (NEVER commit) ----
 data/
+datasets/
+# raw source images live on external drive; not in repo
 
-# model weights
+# ---- HEAVY: trained models / checkpoints (NEVER commit) ----
 checkpoints/
 *.pt
 *.pth
+*.onnx
+*.tflite
+*.npz
 
-# generated outputs
+# ---- Generated outputs ----
 outputs/
 logs/
+export/
+*.png
+*.jpg
+*.jpeg
+# (exception: keep repo docs images if you add any under docs/)
+!docs/**/*.png
 
-# python cruft
-__pycache__/
-*.pyc
-*.egg-info/
-.ipynb_checkpoints/
+# ---- Notebooks' heavy outputs (optional: strip before commit) ----
+# *.ipynb   # uncomment ONLY if you don't want notebooks tracked
+
+# ---- OS / editor cruft ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# ---- Config that may hold local paths / secrets ----
+# .env

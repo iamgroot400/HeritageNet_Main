@@ -119,9 +119,10 @@
 const MODEL_URL = "heritagenet.onnx";
 const LABELS_URL = "labels.json";
 const INFO_URL   = "site_info.json";
+const PROTOS_URL = "prototypes.json";
 const MEAN = [0.485,0.456,0.406], STD = [0.229,0.224,0.225];
 
-let session=null, labels=null, info=null;
+let session=null, labels=null, info=null, protos=null;
 const statusEl=document.getElementById('status');
 const resultEl=document.getElementById('result');
 const rimg=document.getElementById('rimg');
@@ -133,9 +134,10 @@ async function init(){
   try{
     setStatus('<span class="spinner"></span>loading model…');
     ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/";
-    [labels, info] = await Promise.all([
+    [labels, info, protos] = await Promise.all([
       fetch(LABELS_URL).then(r=>r.json()),
       fetch(INFO_URL).then(r=>r.json()).catch(()=>({})),
+      fetch(PROTOS_URL).then(r=>r.json()).catch(()=>null),   // optional distance gate
     ]);
     session = await ort.InferenceSession.create(MODEL_URL,
       {executionProviders:["wasm"]});
@@ -171,6 +173,19 @@ function softmax(a){
   const s=e.reduce((p,q)=>p+q,0); return e.map(x=>x/s);
 }
 
+// cosine distance from an embedding to the nearest (pre-normalized) prototype
+function nearestPrototypeDistance(emb, protosNorm){
+  let n=0; for(let i=0;i<emb.length;i++) n+=emb[i]*emb[i];
+  n=Math.sqrt(n)+1e-8;
+  let best=2.0;
+  for(const p of protosNorm){
+    let dot=0; for(let i=0;i<emb.length;i++) dot+=emb[i]*p[i];
+    const dist=1 - dot/n;           // p is already unit-normalized
+    if(dist<best) best=dist;
+  }
+  return best;
+}
+
 async function classify(imgEl){
   if(!session){ setStatus('model not ready yet…'); return; }
   setStatus('<span class="spinner"></span>analyzing…');
@@ -181,20 +196,34 @@ async function classify(imgEl){
     const probs=softmax(logits);
     const idx=probs.map((p,i)=>[p,i]).sort((a,b)=>b[0]-a[0]);
     const thr=(parseFloat(document.getElementById('thr').value)||0)/100;
-    render(idx, probs, thr);
+
+    // --- distance gate (open-set) ---
+    let nearDist=null, distOk=true;
+    if(protos && out.embedding){
+      const emb=Array.from(out.embedding.data);
+      nearDist=nearestPrototypeDistance(emb, protos.prototypes_normalized);
+      distOk = nearDist <= protos.cutoff;
+    }
+    render(idx, probs, thr, nearDist, distOk);
     setStatus('');
   }catch(e){ setStatus('⚠️ inference failed: '+e.message); }
 }
 
-function render(idx, probs, thr){
+function render(idx, probs, thr, nearDist, distOk){
   const [topP, topI]=idx[0];
   const key=labels[topI]; const meta=(info&&info[key])||{};
   const nameNice=(meta.name)|| (key? key.replace(/_/g,' '):('class '+topI));
   let html;
-  if(topP<thr){
+  const confOk = topP>=thr;
+  if(!confOk || !distOk){
+    const reason = !distOk
+      ? `This doesn't look like any of the 26 known heritage sites.`
+      : `The model isn't confident enough (top guess ${nameNice}, ${(topP*100).toFixed(0)}%).`;
+    const distNote = (nearDist!=null)
+      ? `<br><span style="font-size:12px;color:var(--sub)">distance to nearest known site: ${nearDist.toFixed(2)} (cutoff ${protos?protos.cutoff.toFixed(2):'n/a'})</span>`
+      : ``;
     html=`<div class="unknown"><h2>Not recognized</h2>
-      <p>The model isn't confident this is one of its 26 known sites
-      (top guess ${nameNice}, ${(topP*100).toFixed(0)}%). Try a clearer, closer photo.</p></div>`;
+      <p>${reason} Try a clearer, closer photo of a temple, stupa, or monastery.${distNote}</p></div>`;
   }else{
     const confClass=topP>=0.75?'hi':'lo';
     html=`<div class="rbody">
