@@ -1,0 +1,32 @@
+                                       precision    recall  f1-score   support
+
+                  Ashok_stupa_Chaitya      0.889     1.000     0.941         8
+                     Badrinath_Temple      1.000     1.000     1.000         5
+                     Balkumari_Temple      1.000     1.000     1.000         5
+                      Bhagwati_Temple      1.000     0.800     0.889         5
+            Bhairahawa_Hanuman_Temple      1.000     1.000     1.000         5
+            Bijayanagar_Gadesh_Mandir      1.000     0.800     0.889         5
+                        Chamundra_Mai      0.833     0.714     0.769         7
+                  Ganesh_Mandir_Patan      0.857     1.000     0.923         6
+                           Heritage_1      1.000     0.800     0.889         5
+                           Heritage_2      1.000     0.700     0.824        10
+                           Heritage_3      0.571     0.667     0.615         6
+Hiranya_Varna_Mahavihar_Golden_Temple      0.818     0.900     0.857        10
+             Kareshwor_Mahadev_Temple      1.000     0.857     0.923         7
+                  Karyabinayak_Temple      0.833     0.833     0.833         6
+                                Kudan      1.000     0.750     0.857         8
+           MahaKaleshwor_Shiva_Temple      0.875     1.000     0.933        14
+                Nageshwor_Dham_Temple      1.000     1.000     1.000         6
+            Narmadeshwor_Shiva_Temple      0.889     0.889     0.889         9
+        Nyahgayur_Shanti_Buddha_Gumba      1.000     0.889     0.941         9
+         Prakashashwor_Mahadev_Temple      1.000     0.750     0.857         4
+                           Ram_Temple      0.778     1.000     0.875         7
+             Shiva_Panchayatan_Temple      1.000     1.000     1.000         9
+          Shree_Swami_Mai_Mata_Temple      1.000     1.000     1.000         6
+              Sujat_Prabha_Maha_Bihar      0.462     0.857     0.600         7
+                        Surya_Binayak      1.000     0.250     0.400         4
+                      Yampi_Mahabihar      0.571     0.667     0.615         6
+
+                             accuracy                          0.866       179
+                            macro avg      0.899     0.851     0.858       179
+                         weighted avg      0.894     0.866     0.867       179
