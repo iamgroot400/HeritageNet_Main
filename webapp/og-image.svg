@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faf8f5"/>
+      <stop offset="1" stop-color="#f0ebe3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="80" y="140" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700"
+    letter-spacing="6" fill="#1f8a80">HERITAGENET</text>
+
+  <text x="78" y="250" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="800"
+    fill="#243b53">Identify Nepali</text>
+  <text x="78" y="330" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="800"
+    fill="#243b53">heritage sites</text>
+
+  <text x="80" y="390" font-family="'Segoe UI', Arial, sans-serif" font-size="26" fill="#627d98">
+    Runs entirely on your phone — snap a photo, get an answer.</text>
+
+  <text x="80" y="560" font-family="'Segoe UI', Arial, sans-serif" font-size="22" fill="#e8663d" font-weight="600">
+    heritage.tourismtimesnepal.com</text>
+
+  <g transform="translate(920,180)">
+    <circle cx="130" cy="20" r="16" fill="#e2a63b"/>
+    <rect x="122" y="36" width="16" height="34" fill="#1f8a80"/>
+    <path d="M60 76 L200 76 L170 150 L90 150 Z" fill="#1f8a80"/>
+    <path d="M30 220 Q130 130 230 220 L230 250 L30 250 Z" fill="#1f8a80"/>
+    <rect x="10" y="250" width="240" height="34" rx="8" fill="#1f8a80"/>
+    <rect x="-30" y="296" width="320" height="26" rx="8" fill="#1f8a80" opacity="0.85"/>
+  </g>
+</svg>
