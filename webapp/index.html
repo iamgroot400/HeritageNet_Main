@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HeritageNet — Identify Nepali Heritage Sites</title>
+<meta name="description" content="Identify Nepali temples, stupas, and monasteries from a photo. HeritageNet runs entirely on your device — no upload, no server, instant results.">
+<meta name="theme-color" content="#1f8a80">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HeritageNet — Identify Nepali Heritage Sites">
+<meta property="og:description" content="Snap a photo of a temple, stupa, or monastery and HeritageNet names it — entirely on-device.">
+<meta property="og:image" content="https://heritage.tourismtimesnepal.com/og-image.png">
+<meta property="og:url" content="https://heritage.tourismtimesnepal.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HeritageNet — Identify Nepali Heritage Sites">
+<meta name="twitter:description" content="Snap a photo of a temple, stupa, or monastery and HeritageNet names it — entirely on-device.">
+<meta name="twitter:image" content="https://heritage.tourismtimesnepal.com/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
@@ -270,6 +283,12 @@ drop.addEventListener('click',()=>document.getElementById('file').click());
 drop.addEventListener('drop',e=>{ if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
 
 init();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
